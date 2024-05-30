@@ -1,7 +1,7 @@
 {
     "name": "Pilote-Launcher",
     "preductname": "Pilote Launcher",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Launcher Mincraft pour le serveur de Pilote Production",
     "main": "src/app.js",
     "author": {
