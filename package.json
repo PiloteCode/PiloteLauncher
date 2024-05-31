@@ -1,7 +1,7 @@
 {
     "name": "Pilote-Launcher",
     "preductname": "Pilote Launcher",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Launcher Mincraft pour le serveur de Pilote Production",
     "main": "src/app.js",
     "author": {
@@ -23,9 +23,9 @@
     },
     "dependencies": {
         "electron-updater": "^6.1.8",
-        "pilotestudio-java-core": "^3.10.1",
         "node-bdd": "^2.0.3",
         "node-fetch": "^2.7.0",
+        "pilotestudio-java-core": "^3.10.5",
         "xml-js": "^1.6.11"
     },
     "devDependencies": {
