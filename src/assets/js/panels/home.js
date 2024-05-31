@@ -243,7 +243,9 @@ class Home {
             }
         }
 
+        launch.verifyAPI(opt);
         launch.Launch(opt);
+        
 
         playInstanceBTN.style.display = "none"
         infoStartingBOX.style.display = "block"
