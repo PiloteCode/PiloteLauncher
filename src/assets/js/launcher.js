@@ -9,7 +9,7 @@ import Settings from './panels/settings.js';
 
 // import modules
 import { logger, config, changePanel, database, popup, setBackground, accountSelect, addAccount, pkg } from './utils.js';
-const { AZauth, Microsoft, Mojang } = require('minecraft-java-core');
+const { AZauth, Microsoft, Mojang } = require('pilotestudio-java-core');
 
 // libs
 const { ipcRenderer } = require('electron');
