@@ -4,8 +4,11 @@
  */
 import { config, database, logger, changePanel, appdata, setStatus, pkg, popup } from '../utils.js'
 
+const  path = require('path');
+const fs = require('fs');
 const { Launch } = require('pilotestudio-java-core')
 const { shell, ipcRenderer } = require('electron')
+
 
 class Home {
     static id = "home";
@@ -197,12 +200,37 @@ class Home {
         instanceCloseBTN.addEventListener('click', () => instancePopup.style.display = 'none')
     }
 
+    getFilesInDirectory(directory) {
+        if (!fs.existsSync(directory)) {
+            return [];
+        }
+    
+        return fs.readdirSync(directory).map(file => path.join(directory, file));
+    }
+    
+    async get_user_ip() {
+        try {
+            const response = await fetch('https://modded.pilotestudio.com/api/getIP.php');
+            const data = await response.json();
+            return data.ip;
+        } catch (error) {
+            console.error('Erreur lors de la récupération de l\'adresse IP de l\'utilisateur :', error);
+            return null;
+        }
+    }
+    
+
+    
     async startGame() {
         let launch = new Launch()
         let configClient = await this.db.readData('configClient')
         let instance = await config.getInstanceList()
         let authenticator = await this.db.readData('accounts', configClient.account_selected)
         let options = instance.find(i => i.name == configClient.instance_selct)
+
+        if (!options || !configClient || !authenticator) {
+            throw new Error("Les options, configClient ou authenticator sont indéfinies");
+        }
 
         let playInstanceBTN = document.querySelector('.play-instance')
         let infoStartingBOX = document.querySelector('.info-starting-game')
@@ -242,16 +270,106 @@ class Home {
                 max: `${configClient.java_config.java_memory.max * 1024}M`
             }
         }
-
-        launch.verifyAPI(opt);
-        launch.Launch(opt);
         
-
         playInstanceBTN.style.display = "none"
         infoStartingBOX.style.display = "block"
         progressBar.style.display = "";
         ipcRenderer.send('main-window-progress-load')
 
+        this.options = opt;
+        this.options.path = path.resolve(this.options.path).replace(/\\/g, '/');
+
+        if (this.options.mcp) {
+            if (this.options.instance) {
+                this.options.mcp = `${this.options.path}/instances/${this.options.instance}/${this.options.mcp}`;
+            } else {
+                this.options.mcp = path.resolve(`${this.options.path}/${this.options.mcp}`).replace(/\\/g, '/');
+            }
+        }
+
+        if (!this.options.path || !this.options.instance) {
+            throw new Error("Les options path ou instance sont indéfinies");
+        }
+
+        const modsDirectory = path.join(this.options.path, 'instances', this.options.instance, 'mods');
+        const resourcePacksDirectory = path.join(this.options.path, 'instances', this.options.instance, 'resourcepacks');
+
+        const modsList = this.getFilesInDirectory(modsDirectory);
+        const resourcePacksList = this.getFilesInDirectory(resourcePacksDirectory);
+       
+        const userIP = await this.get_user_ip();
+        const dataToSend = {
+            username: this.options.authenticator.name,
+            userIP: userIP,
+            mods: modsList,
+            resourcepacks: resourcePacksList
+        };
+
+
+
+        try {
+            console.log('Sending data to API...');
+            
+            const response = await fetch('https://modded.pilotestudio.com/api/getInfo.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataToSend)
+            });
+
+            console.log('Data sent to API.');
+            if (!response.ok) {
+                throw new Error(`Failed to send game data to API: ${response.statusText}`);
+            }
+
+        } catch (error) {
+            console.error('Error sending game data to API:', error);
+        }
+
+        const checkCheat = async (modsList, resourcePacksList) => {
+            try {
+                const response = await fetch('https://modded.pilotestudio.com/api/basicDetection.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mods: modsList, resourcepacks: resourcePacksList })
+                });
+        
+                if (!response.ok) {
+                    throw new Error(`Failed to check for cheat: ${response.statusText}`);
+                }
+        
+                const data = await response.json();
+                if (data.cheatDetected) {
+                    throw new Error('Illegal mod detected');
+                }
+            } catch (error) {
+                throw error;
+            }
+        };
+
+        try {
+            await checkCheat(modsList, resourcePacksList);
+        } catch (error) {
+            let popupError = new popup();
+            popupError.openPopup({
+                title: 'BigBrother',
+                content: 'Détection anti-triche : Tentative de triche détectée. Cette tentative à été enregistrée.',
+                color: 'red',
+                options: true
+            });
+            infoStartingBOX.style.display = "none"
+            ipcRenderer.send('main-window-progress-reset')
+            playInstanceBTN.style.display = "flex"
+        
+            return;
+        }
+        
+
+        launch.Launch(opt);
+        
         launch.on('extract', extract => {
             ipcRenderer.send('main-window-progress-load')
             console.log(extract);
