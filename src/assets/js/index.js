@@ -119,7 +119,7 @@ class Splash {
             this.startLauncher();
         }).catch(e => {
             console.error(e);
-            return this.shutdown("Aucune connexion internet détectée,<br>veuillez réessayer ultérieurement.");
+            return this.shutdown("Aucune connexion internet détectée ^^'<br>veuillez réessayer ultérieurement.");
         })
     }
 

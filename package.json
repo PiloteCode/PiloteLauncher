@@ -1,7 +1,7 @@
 {
     "name": "Pilote-Launcher",
     "preductname": "Pilote Launcher",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "Pilote Modded un serveur inédit !",
     "main": "src/app.js",
     "author": {

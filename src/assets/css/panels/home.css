@@ -260,6 +260,7 @@
     padding-right: 1.9rem;
 }
 
+
 .play-btn {
     border: none;
     border-radius: 10px;
@@ -314,12 +315,37 @@
     border-radius: 10px;
 }
 
+/* Define the rotating animation */
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Initial styles for the settings button */
 .settings-btn {
     width: 3rem;
     height: 3rem;
     font-size: 3rem;
     color: var(--element-color);
     margin: 0 1.5rem;
+    transition: background-color 0.3s ease, border-radius 0.3s ease;
+    animation: rotate 2s linear infinite; /* Rotating animation */
+}
+
+/* Reset animation and pause on hover, add rounded borders */
+.settings-btn:hover {
+    background-color: gray; /* Gray background on hover */
+    animation: none; /* Pause the animation */
+    border-radius: 15%; /* Rounded borders */
+}
+
+/* Resume rotation animation after hover */
+.settings-btn:not(:hover) {
+    animation: rotate 2s linear infinite; /* Resume rotating animation */
 }
 
 .instance-popup {
@@ -376,3 +402,4 @@
 .active-instance {
     background: var(--element-color);
 }
+
