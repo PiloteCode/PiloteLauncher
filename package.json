@@ -22,10 +22,12 @@
         "ignore": "**/test"
     },
     "dependencies": {
+        "discord-rpc": "^4.0.1",
         "electron-updater": "^6.1.8",
         "node-bdd": "^2.0.3",
         "node-fetch": "^2.7.0",
         "pilotestudio-java-core": "^3.10.24",
+        "url": "^0.11.3",
         "xml-js": "^1.6.11"
     },
     "devDependencies": {

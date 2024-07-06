@@ -1,12 +1,7 @@
-/**
- * @author Luuxis
- * @license CC-BY-NC 4.0 - https://creativecommons.org/licenses/by-nc/4.0
- */
-
 const { ipcRenderer, shell } = require('electron');
 const pkg = require('../package.json');
 const os = require('os');
-import { config, database } from './utils.js';
+const { config, database } = require('./utils.js');
 const nodeFetch = require("node-fetch");
 
 
@@ -20,11 +15,11 @@ class Splash {
         document.addEventListener('DOMContentLoaded', async () => {
             let databaseLauncher = new database();
             let configClient = await databaseLauncher.readData('configClient');
-            let theme = configClient?.launcher_config?.theme || "auto"
-            let isDarkTheme = await ipcRenderer.invoke('is-dark-theme', theme).then(res => res)
+            let theme = configClient?.launcher_config?.theme || "auto";
+            let isDarkTheme = await ipcRenderer.invoke('is-dark-theme', theme).then(res => res);
             document.body.className = isDarkTheme ? 'dark global' : 'light global';
-            if (process.platform == 'win32') ipcRenderer.send('update-window-progress-load')
-            this.startAnimation()
+            if (process.platform == 'win32') ipcRenderer.send('update-window-progress-load');
+            this.startAnimation();
         });
     }
 
@@ -62,23 +57,22 @@ class Splash {
             if (os.platform() == 'win32') {
                 this.toggleProgress();
                 ipcRenderer.send('start-update');
-            }
-            else return this.dowloadUpdate();
-        })
+            } else return this.dowloadUpdate();
+        });
 
         ipcRenderer.on('error', (event, err) => {
             if (err) return this.shutdown(`${err.message}`);
-        })
+        });
 
         ipcRenderer.on('download-progress', (event, progress) => {
-            ipcRenderer.send('update-window-progress', { progress: progress.transferred, size: progress.total })
+            ipcRenderer.send('update-window-progress', { progress: progress.transferred, size: progress.total });
             this.setProgress(progress.transferred, progress.total);
-        })
+        });
 
         ipcRenderer.on('update-not-available', () => {
             console.error("Mise à jour non disponible");
             this.maintenanceCheck();
-        })
+        });
     }
 
     getLatestReleaseForOS(os, preferredFormat, asset) {
@@ -104,14 +98,12 @@ class Splash {
         if (os.platform() == 'darwin') latest = this.getLatestReleaseForOS('mac', '.dmg', latestRelease);
         else if (os == 'linux') latest = this.getLatestReleaseForOS('linux', '.appimage', latestRelease);
 
-
         this.setStatus(`Mise à jour disponible !<br><div class="download-update">Télécharger</div>`);
         document.querySelector(".download-update").addEventListener("click", () => {
             shell.openExternal(latest.browser_download_url);
             return this.shutdown("Téléchargement en cours...");
         });
     }
-
 
     async maintenanceCheck() {
         config.GetConfig().then(res => {
@@ -120,7 +112,7 @@ class Splash {
         }).catch(e => {
             console.error(e);
             return this.shutdown("Aucune connexion internet détectée ^^'<br>veuillez réessayer ultérieurement.");
-        })
+        });
     }
 
     startLauncher() {
@@ -160,5 +152,6 @@ document.addEventListener("keydown", (e) => {
     if (e.ctrlKey && e.shiftKey && e.keyCode == 73 || e.keyCode == 123) {
         ipcRenderer.send("update-window-dev-tools");
     }
-})
+});
+
 new Splash();
