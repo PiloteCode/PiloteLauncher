@@ -22,6 +22,8 @@ function destroyWindow() {
     mainWindow = undefined;
 }
 
+
+
 function createWindow() {
     destroyWindow();
     mainWindow = new BrowserWindow({
@@ -52,6 +54,8 @@ function createWindow() {
     });
 }
 
+const version = pkg.version;
+
 function initializeDiscordRPC() {
     const clientId = '1258778967649947718';
     DiscordRPC.register(clientId);
@@ -62,13 +66,16 @@ function initializeDiscordRPC() {
     rpc.on('ready', () => {
         console.log('Discord RPC prêt');
         rpc.setActivity({
-            details: `Pilote Launcher`,
-            state: `PILOTE SMP`,
+            details: `Pilote SMP`,
+            state: `1 joueur - 1.20.4 Forge`,
             startTimestamp,
             largeImageKey: 'image',
-            largeImageText: `discord.gg/PILOTE`,
+            largeImageText: `Pilote SMP`,
             smallImageKey: 'image_small',
-            smallImageText: 'V1.0.9',
+            smallImageText: version,
+            buttons: [
+                { label: 'Rejoindre', url: 'https://discord.gg/PILOTE' }
+            ],
             instance: false,
         });
     });
